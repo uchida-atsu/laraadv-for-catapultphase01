@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Yasumi\Yasumi;
+use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
@@ -20,7 +22,36 @@ class ReservationController extends Controller
      */
     public function create()
     {
-        //
+        $year = Carbon::now()->year;
+        $holidays = Yasumi::create('Japan', $year, 'ja_JP');
+
+        // 明日から7日間の日付
+        $dates = collect();
+        for ($i = 0; $i < 7; $i++) {
+            $date = Carbon::tomorrow()->addDays($i);
+            $dates->push([
+                'date' => $date,
+                'isHoliday' => $holidays->isHoliday($date),
+            ]);
+        }
+
+        // 10時から17時まで一時間で区切る
+        $timeSlots = [];
+        $start = Carbon::createFromTime(10, 0); // 10:00
+        $end = Carbon::createFromTime(17, 0);   // 17:00
+
+        while ($start->lte($end)) {
+            $timeSlots[] = $start->format('H:i'); // "10:00"
+            $start->addHour();
+        }
+
+        // すでに入っている予約データを取得
+        $reservations = \App\Models\Reservation::whereBetween(
+            'reserved_at',
+            [Carbon::tomorrow()->startOfDay(), Carbon::today()->addDays(7)->endOfDay()]
+        )->get();
+
+        return view('reservations.create', compact('dates', 'timeSlots', 'reservations'));
     }
 
     /**
