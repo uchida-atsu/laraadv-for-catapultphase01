@@ -5,42 +5,49 @@
         </h2>
     </x-slot>
     <div>
-        <table class="table-auto border-collapse border">
-            <thead>
-                <tr>
-                    <th></th>
-                    @foreach ($dates as $date)
-                        <th class="border px-4 py-2">{{ $date['date']->format('m/d') }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($timeSlots as $slot)
+        <form action="{{ route('reservations.store') }}" method="POST">
+            @csrf
+
+            <!-- {{-- 日付 × 時間表 --}} -->
+            <div>
+                <table border="1">
                     <tr>
-                        <td class="border px-4 py-2">{{ $slot }}</td>
-                        @foreach ($dates as $date)
-                            @php
-                                $reservedAt = $date['date']->copy()->setTimeFromTimeString($slot);
-                                $count = $reservations->where('reserved_at', $reservedAt)->count();
-                                $max = 3;
-                                $isFull = $count >= $max;
-                            @endphp
-                            <td class="border px-4 py-2 text-center">
-                                @if ($isFull)
-                                    <span class="text-red-500">満</span>
-                                @else
-                                    <button type="button"
-                                        wire:click="selectSlot('{{ $reservedAt }}')"
-                                        class="px-2 py-1 bg-blue-500 text-white rounded">
-                                        ○
-                                    </button>
-                                @endif
-                            </td>
+                        <th>日付</th>
+                        @foreach ($timeSlots as $time)
+                            <th>{{ $time }}</th>
                         @endforeach
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                    @foreach ($dates as $d)
+                        <tr>
+                            <td>{{ $d['date']->format('m/d') }}
+                                @if($d['isHoliday'])
+                                    <span style="color:red">祝日</span>
+                                @endif
+                            </td>
+                            @foreach ($timeSlots as $time)
+                                @php
+                                    $datetime = $d['date']->format('Y-m-d') . ' ' . $time;
+                                @endphp
+                                <td>
+                                    <input type="radio" 
+                                        name="reserved_at" 
+                                        value="{{ $datetime }}">
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
+
+            <!-- {{-- 使用目的 --}} -->
+            <div>
+                <label for="purpose">使用目的:</label><br>
+                <textarea name="purpose" id="purpose" rows="3" required></textarea>
+            </div>
+            <div>
+                <button type="submit">予約完了</button>
+            </div>
+        </form>
     </div>
 </x-app-layout>
 

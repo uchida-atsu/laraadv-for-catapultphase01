@@ -59,8 +59,21 @@ class ReservationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'reserved_at' => 'required|date',
+            'purpose' => 'required|string|max:255',
+        ]);
+
+        Reservation::create([
+            'user_id' => auth()->id(),
+            'reserved_at' => $request->reserved_at,
+            'purpose' => $request->purpose,
+        ]);
+
+        return redirect()->route('reservations.index')->with('success', '予約が完了しました');
     }
+
+
 
     /**
      * Display the specified resource.
