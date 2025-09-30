@@ -15,6 +15,11 @@ class ReservationController extends Controller
     public function index()
     {
         //
+        $reservations = Reservation::where('user_id', auth()->id())
+        ->orderBy('reserved_at', 'asc')
+        ->get();
+
+        return view('reservations.index', compact('reservations'));
     }
 
     /**
@@ -64,13 +69,24 @@ class ReservationController extends Controller
             'purpose' => 'required|string|max:255',
         ]);
 
-        Reservation::create([
-            'user_id' => auth()->id(),
-            'reserved_at' => $request->reserved_at,
-            'purpose' => $request->purpose,
-        ]);
+        try {
+            $reservation = Reservation::create([
+                'user_id' => auth()->id(),
+                'reserved_at' => $request->reserved_at,
+                'purpose' => $request->purpose,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->errorInfo[1] === 1062) {
+                // 同じユーザー・日時の重複予約エラー
+                return back()->withErrors([
+                    'reserved_at' => 'この時間帯はすでに予約済みです。',
+                ]);
+            }
+            throw $e;
+        }
 
-        return redirect()->route('reservations.index')->with('success', '予約が完了しました');
+        // return redirect()->route('reservations.complete')->with('success', '予約が完了しました');
+        return redirect()->route('reservations.complete', ['reservation' => $reservation->id])->with('completed', true);
     }
 
 
@@ -105,5 +121,18 @@ class ReservationController extends Controller
     public function destroy(Reservation $reservation)
     {
         //
+    }
+
+    /**
+     * show the result
+     */
+    public function complete(Reservation $reservation)
+    {
+        if (!session('completed')) {
+            // 直アクセス防止 → 予約一覧にリダイレクト
+            return redirect()->route('reservations.create');
+        }
+
+        return view('reservations.complete');
     }
 }

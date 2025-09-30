@@ -1,0 +1,79 @@
+/* public/css/reservation.css */
+
+.reservation-table {
+    border-collapse: collapse; /* セルの二重線をなくす */
+    width: 100%;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.reservation-table th,
+.reservation-table td {
+    border: 1px solid #ccc; /* 線を薄くして見やすく */
+    padding: 8px 12px; /* 余白 */
+}
+
+.reservation-table th {
+    background-color: #f0f0f0;
+}
+
+.reservation-table tr:hover td {
+    background-color: #f9f9f9; /* ホバーで見やすく */
+}
+
+.holiday {
+    color: red;
+    font-weight: bold;
+}
+
+/* フォームグループ全体（行）の設定 */
+.form-group {
+    /* フォームを左端から離すための余白 */
+    margin-left: 20px;
+    margin-bottom: 15px; 
+
+    /* ★ 横並びにする設定（Flexbox） */
+    display: flex; 
+    align-items: center; /* 垂直方向の中央揃え */
+    /* フォーム全体の最大幅を制御すると見栄えが良い */
+    max-width: 400px; 
+}
+
+/* 1列目: ラベル（「使用目的:」）の設定 */
+.form-group label {
+    /* ★ 1列目の幅を固定（ここが「セル」の幅になります） */
+    width: 100px; 
+    margin-right: 10px; 
+    text-align: center;
+    /* labelの文字が中央揃えに見えるように少しpaddingで調整しても良い */
+    padding: 8px;
+    border: 1px solid #ccc;
+}
+
+/* 2列目: 入力欄（input）のデザイン */
+.form-input {
+    /* ★ inputが残りのスペースを全て埋めるように設定 */
+    flex-grow: 1; /* 残りの幅を占有 */
+    
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    /* 最大幅を設定しないことで、親要素いっぱいになります */
+}
+
+/* 予約完了ボタンのデザイン（前の回答のCSSを再利用） */
+.reservation-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.reservation-button:hover {
+    background-color: #0056b3;
+}

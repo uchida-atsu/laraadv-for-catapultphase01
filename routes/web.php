@@ -19,6 +19,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     // Reservationに関するCRUD処理のルート
     Route::resource('reservations', ReservationController::class);
+    Route::get('/reservations/{reservation}/complete', [ReservationController::class, 'complete'])->name('reservations.complete');
+
 });
 
 require __DIR__.'/auth.php';
