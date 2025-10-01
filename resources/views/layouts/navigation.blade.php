@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('reservations.create')" :active="request()->routeIs('reservations.create')">
                         {{ __('予約画面') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('mypage.index')" :active="request()->routeIs('mypage.index')">
+                        {{ __('マイページ') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -75,6 +78,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('reservations.create')" :active="request()->routeIs('reservations.create')">
                 {{ __('予約画面') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('mypage.index')" :active="request()->routeIs('mypage.index')">
+                {{ __('マイページ') }}
             </x-responsive-nav-link>
         </div>
 
