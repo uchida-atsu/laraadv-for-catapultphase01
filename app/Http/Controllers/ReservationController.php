@@ -136,7 +136,9 @@ class ReservationController extends Controller
 
         return view('reservations.complete');
     }
-
+    /**
+     * show the form for editting
+     */
     public function manage()
     {
         $user = auth()->user();
@@ -144,5 +146,23 @@ class ReservationController extends Controller
         $upcomingReservations = $user->reservations()->upcoming()->orderBy('reserved_at')->get();
 
         return view('reservations.manage', compact('upcomingReservations'));
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:reservations,id',
+        ]);
+
+        // ログインユーザー本人の予約だけ削除できるように制限
+        auth()->user()
+            ->reservations()
+            ->upcoming() 
+            ->whereIn('id', $request->ids)
+            ->delete();
+
+        return redirect()->route('mypage.index')
+            ->with('success', '選択した予約を削除しました。');
     }
 }
