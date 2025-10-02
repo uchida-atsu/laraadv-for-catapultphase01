@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage.index');
 
     // Reservationに関するCRUD処理のルート
+    Route::get('/reservations/manage', [ReservationController::class, 'manage'])->name('reservations.manage');
     Route::resource('reservations', ReservationController::class);
     Route::get('/reservations/{reservation}/complete', [ReservationController::class, 'complete'])->name('reservations.complete');
 

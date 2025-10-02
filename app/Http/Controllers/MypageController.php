@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Reservation;
 
 class MypageController extends Controller
 {
@@ -12,14 +13,13 @@ class MypageController extends Controller
      */
     public function index()
     {
-        // App\Models\User クラスのオブジェクトが生成される
-        $user = Auth::user();
-        // Userモデルのリレーションからメソッドreservations()を呼び出せる
-        $reservations = $user->reservations()->orderBy('reserved_at', 'desc')->get();
+        $user = auth()->user();
 
-        return view('mypage.index', compact('user', 'reservations'));
+        $upcomingReservations = $user->reservations()->upcoming()->orderBy('reserved_at')->get();
+        $pastReservations = $user->reservations()->past()->orderByDesc('reserved_at')->get();
+
+        return view('mypage.index', compact('user', 'upcomingReservations', 'pastReservations'));
     }
-
     /**
      * Show the form for creating a new resource.
      */

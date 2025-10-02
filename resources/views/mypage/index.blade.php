@@ -12,19 +12,28 @@
                 <p>名前: {{ $user->name }}</p>
                 <p>メール: {{ $user->email }}</p>
 
-                <h3 class="text-lg font-bold mt-6 mb-4">予約一覧</h3>
-                @if ($reservations->isEmpty())
-                    <p>現在、予約はありません。</p>
-                @else
-                    <ul>
-                        @foreach ($reservations as $reservation)
-                            <li class="mb-2">
-                                {{ \Carbon\Carbon::parse($reservation->reserved_at)->format('Y-m-d H:i') }}
-                                ： {{ $reservation->purpose }}
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
+                <h3 class="text-lg font-bold mt-6 mb-4 flex items-center flex-start">
+                    <span>予約一覧　</span>
+                    <a href="{{ route('reservations.manage') }}" class="text-blue-600 hover:underline">
+                        編集する
+                    </a>
+                </h3>
+
+                <ul>
+                    @forelse ($upcomingReservations as $reservation)
+                        <li>{{ $reservation->reserved_at }} - {{ $reservation->purpose }}</li>
+                    @empty
+                        <li>これからの予約はありません</li>
+                    @endforelse
+                </ul>
+                <h3 class="text-lg font-bold mt-6 mb-4">履歴一覧</h3>
+                <ul>
+                    @forelse ($pastReservations as $reservation)
+                        <li>{{ $reservation->reserved_at }} - {{ $reservation->purpose }}</li>
+                    @empty
+                        <li>履歴はありません</li>
+                    @endforelse
+                </ul>
             </div>
         </div>
     </div>

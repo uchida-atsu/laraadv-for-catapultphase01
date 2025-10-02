@@ -1,7 +1,9 @@
 <x-app-layout>
-    <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-        {{ __('予約完了ページ') }}
-    </h2>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            完了ページ
+        </h2>
+    </x-slot>
 
     <div>
         @if (session('completed'))

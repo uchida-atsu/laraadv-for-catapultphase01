@@ -136,4 +136,13 @@ class ReservationController extends Controller
 
         return view('reservations.complete');
     }
+
+    public function manage()
+    {
+        $user = auth()->user();
+
+        $upcomingReservations = $user->reservations()->upcoming()->orderBy('reserved_at')->get();
+
+        return view('reservations.manage', compact('upcomingReservations'));
+    }
 }

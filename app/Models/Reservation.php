@@ -16,6 +16,21 @@ class Reservation extends Model
         'purpose',
     ];
     /**
+     * 予約（履歴を除く）を取り出す
+     */
+    public function scopeUpcoming($query)
+    {
+        return $query->where('reserved_at', '>=', now());
+    }
+    /**
+     * 履歴を取り出す
+     */
+    public function scopePast($query)
+    {
+        return $query->where('reserved_at', '<', now());
+    }
+    
+    /**
      * relation to User
      */
     public function user()
