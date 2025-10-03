@@ -84,7 +84,8 @@ class ReservationController extends Controller
             }
             throw $e;
         }
-
+        
+        
         // return redirect()->route('reservations.complete')->with('success', '予約が完了しました');
         return redirect()->route('reservations.complete', ['reservation' => $reservation->id])->with('completed', true);
     }
@@ -134,7 +135,7 @@ class ReservationController extends Controller
             return redirect()->route('reservations.create');
         }
 
-        return view('reservations.complete');
+        return view('reservations.complete', ['reservation' => $reservation,]);
     }
     /**
      * show the form for editting
