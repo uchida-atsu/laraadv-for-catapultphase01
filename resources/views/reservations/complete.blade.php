@@ -12,8 +12,10 @@
                 
                 <br> <div class="flex flex-col items-center justify-center">
                     <p class="text-2xl font-bold text-center">予約内容</p>
-                    <p class="text-center">日時: {{ $reservation->reserved_at }}</p>
-                    <p class="text-center">目的: {{ $reservation->purpose }}</p>
+                    @foreach ($reservations as $reservation)
+                        <p class="text-center">日時: {{ $reservation->reserved_at }}</p>
+                        <p class="text-center">目的: {{ $reservation->purpose }}</p>
+                    @endforeach
                 </div>
             </div>
         @endif

@@ -15,11 +15,6 @@ class ReservationController extends Controller
     public function index()
     {
         //
-        $reservations = Reservation::where('user_id', auth()->id())
-        ->orderBy('reserved_at', 'asc')
-        ->get();
-
-        return view('reservations.index', compact('reservations'));
     }
 
     /**
@@ -65,16 +60,34 @@ class ReservationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'reserved_at' => 'required|date',
+            'reserved_at' => 'required|array',
+            'reserved_at.*' => 'date_format:Y-m-d H:i',
             'purpose' => 'required|string|max:255',
         ]);
 
+
+        $user = auth()->user();
+
+        // 件数チェック（履歴を含めない）
+        $upcomingReservations = $user->reservations()->upcoming()->count();
+        $maxReservations = 5;
+
+        if ($upcomingReservations >= $maxReservations) {
+            return redirect()->back()
+                ->withErrors([
+                    'reserved_at' => '予約可能件数の上限に達しました。'
+                ]);
+        }
+
         try {
-            $reservation = Reservation::create([
-                'user_id' => auth()->id(),
-                'reserved_at' => $request->reserved_at,
-                'purpose' => $request->purpose,
-            ]);
+            $reservations = [];
+            foreach ($request->reserved_at as $datetime) {
+                $reservations[] = Reservation::create([
+                    'user_id' => auth()->id(),
+                    'reserved_at' => $datetime,
+                    'purpose' => $request->purpose,
+                ]);
+            }
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->errorInfo[1] === 1062) {
                 // 同じユーザー・日時の重複予約エラー
@@ -84,11 +97,15 @@ class ReservationController extends Controller
             }
             throw $e;
         }
-        
-        
-        // return redirect()->route('reservations.complete')->with('success', '予約が完了しました');
-        return redirect()->route('reservations.complete', ['reservation' => $reservation->id])->with('completed', true);
+
+        return redirect()
+            ->route('reservations.complete')
+            ->with([
+                'completed' => true,
+                'reservations' => $reservations
+            ]);
     }
+
 
 
 
@@ -106,7 +123,6 @@ class ReservationController extends Controller
     public function edit(Reservation $reservation)
     {
         //
-        return view('reservations.edit', compact('reservation'));
     }
 
     /**
@@ -128,14 +144,18 @@ class ReservationController extends Controller
     /**
      * show the result
      */
-    public function complete(Reservation $reservation)
+    public function complete()
     {
         if (!session('completed')) {
             // 直アクセス防止 → 予約一覧にリダイレクト
             return redirect()->route('reservations.create');
         }
 
-        return view('reservations.complete', ['reservation' => $reservation,]);
+        $reservations = session('reservations', []);
+
+        return view('reservations.complete', [
+            'reservations' => $reservations,
+        ]);
     }
     /**
      * show the form for editting

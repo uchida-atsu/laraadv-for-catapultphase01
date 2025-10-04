@@ -34,8 +34,8 @@
                                         $datetime = $d['date']->format('Y-m-d') . ' ' . $time;
                                     @endphp
                                     <td>
-                                        <input type="radio" 
-                                            name="reserved_at" 
+                                        <input type="checkbox" 
+                                            name="reserved_at[]" 
                                             value="{{ $datetime }}">
                                     </td>
                                 @endforeach
@@ -44,9 +44,10 @@
                     </tbody>
                 </table>
 
-                @error('reserved_at')
-                    <div class="text-red-500">{{ $message }}</div>
-                @enderror
+                @foreach ($errors->get('reserved_at') as $message)
+                    <div class="font-bold text-red-500">{{ $message }}</div>
+                @endforeach
+
             </div>
             <br>
             <!-- {{-- 使用目的 --}} -->
