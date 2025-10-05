@@ -14,29 +14,36 @@
                 <table class="reservation-table">
                     <thead>
                         <tr>
-                            <th>日付</th>
-                            @foreach ($timeSlots as $time)
-                                <th>{{ $time }}</th>
+                            <th>時間\日付</th>
+                            @foreach ($dates as $day)
+                                <th>{{ $day['date']->format('m/d (D)') }}</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($dates as $d)
+                        @foreach ($times as $time)
                             <tr>
                                 <td>
-                                    {{ $d['date']->format('m/d') }}
-                                    @if($d['isHoliday'])
-                                        <span class="holiday">祝日</span>
-                                    @endif
+                                    {{ $time }}
                                 </td>
-                                @foreach ($timeSlots as $time)
+                                @foreach ($dates as $day)
                                     @php
-                                        $datetime = $d['date']->format('Y-m-d') . ' ' . $time;
+                                        $dateKey = $day['date']->format('Y-m-d');
+                                        $isFull = $timeSlots[$dateKey][$time];
+                                        $dateTime = "{$dateKey} {$time}";
                                     @endphp
                                     <td>
-                                        <input type="checkbox" 
-                                            name="reserved_at[]" 
-                                            value="{{ $datetime }}">
+                                        <label class="block rounded-lg text-center
+                                            {{ $isFull ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-white hover:bg-blue-100' }}">
+                                            <input type="checkbox"
+                                                name="reserved_at[]"
+                                                value="{{ $dateTime }}"
+                                                class="hidden peer"
+                                                {{ $isFull ? 'disabled' : '' }}>
+                                            <span class="peer-checked:bg-blue-300 block rounded-md py-2">
+                                                {{ $isFull ? '満席' : '空室あり' }}
+                                            </span>
+                                        </label>
                                     </td>
                                 @endforeach
                             </tr>

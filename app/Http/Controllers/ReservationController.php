@@ -35,23 +35,36 @@ class ReservationController extends Controller
             ]);
         }
 
-        // 10時から17時まで一時間で区切る
-        $timeSlots = [];
-        $start = Carbon::createFromTime(10, 0); // 10:00
-        $end = Carbon::createFromTime(17, 0);   // 17:00
-
+        $times = collect();
+        $start = Carbon::createFromTime(10, 0);
+        $end = Carbon::createFromTime(17, 0);
         while ($start->lte($end)) {
-            $timeSlots[] = $start->format('H:i'); // "10:00"
+            $times->push($start->format('H:i'));
             $start->addHour();
         }
 
-        // すでに入っている予約データを取得
-        $reservations = \App\Models\Reservation::whereBetween(
-            'reserved_at',
-            [Carbon::tomorrow()->startOfDay(), Carbon::today()->addDays(7)->endOfDay()]
-        )->get();
+        $max = 3;
+    $timeSlots = [];
 
-        return view('reservations.create', compact('dates', 'timeSlots', 'reservations'));
+    foreach ($dates as $day) {
+        $dateKey = $day['date']->format('Y-m-d');
+        foreach ($times as $time) {
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i', "{$dateKey} {$time}");
+            $count = \App\Models\Reservation::where('reserved_at', $dateTime)->count();
+            $isFull = $count >= $max;
+
+            $timeSlots[$dateKey][$time] = $isFull;
+        }
+    }
+
+
+        // // すでに入っている予約データを取得
+        // $reservations = \App\Models\Reservation::whereBetween(
+        //     'reserved_at',
+        //     [Carbon::tomorrow()->startOfDay(), Carbon::today()->addDays(7)->endOfDay()]
+        // )->get();
+
+        return view('reservations.create', compact('dates', 'times', 'timeSlots'));
     }
 
     /**
@@ -75,9 +88,10 @@ class ReservationController extends Controller
         if ($upcomingReservations >= $maxReservations) {
             return redirect()->back()
                 ->withErrors([
-                    'reserved_at' => '予約可能件数の上限に達しました。'
+                    'reserved_at' => 'あなたの予約可能件数の上限に達しました。'
                 ]);
         }
+
 
         try {
             $reservations = [];
