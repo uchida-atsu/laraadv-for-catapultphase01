@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">自分の予約一覧</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">予約一覧</h2>
 
         <form method="POST" action="{{ route('reservations.bulk-delete') }}" class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
             @csrf
