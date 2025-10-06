@@ -6,7 +6,7 @@
     </x-slot>
 
     <div>
-        <form action="{{ route('reservations.purpose') }}" method="POST" class="p-4">
+        <form action="{{ route('reservations.confirm-date') }}" method="POST" class="p-4">
             @csrf
 
             <!-- {{-- 日付 × 時間表 --}} -->

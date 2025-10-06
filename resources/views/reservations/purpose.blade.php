@@ -22,7 +22,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach ($selectedSlots as $slot)
+                            @foreach (session('reserved_at', []) as $slot)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         <input name="reserved_at[]" type="hidden" value="{{ $slot }}">

@@ -67,16 +67,10 @@ class ReservationController extends Controller
         return view('reservations.create', compact('dates', 'times', 'timeSlots'));
     }
 
-    public function purpose(Request $request)
+    public function purpose()
     {
-        // バリデーション
-        $request->validate([
-            'reserved_at' => 'required|array',
-            'reserved_at.*' => 'date_format:Y-m-d H:i',
-        ]);
+        $selectedSlots = session('reserved_at');
 
-        // 変数を定義
-        $selectedSlots = $request->input('reserved_at');
 
         return view('reservations.purpose', compact('selectedSlots'));
     }
@@ -94,46 +88,26 @@ class ReservationController extends Controller
         ]);
 
 
-        $user = auth()->user();
-
-        // 件数チェック（履歴を含めない）
-        $upcomingReservations = $user->reservations()->upcoming()->count();
-        $maxReservations = 5;
-
-        if ($upcomingReservations >= $maxReservations) {
-            return redirect()->back()
-                ->withErrors([
-                    'reserved_at' => 'あなたの予約可能件数の上限に達しました。'
-                ]);
-        }
         // reserved_atの配列を渡す
         $reservedAts = $validated['reserved_at'];
         // purposeの配列を渡す
         $purposes = $validated['purpose'];
 
-        try {
-            $reservations = collect();
-            foreach ($reservedAts as $i => $reservedAt) {
-                $purpose = $purposes[$i] ?? null;
+        
+        $reservations = collect();
+        foreach ($reservedAts as $i => $reservedAt) {
+            $purpose = $purposes[$i] ?? null;
 
-                if ($purpose) {
-                    $reservation = Reservation::create([
-                        'user_id' => auth()->id(),
-                        'reserved_at' => $reservedAt,
-                        'purpose' => $purpose,
-                    ]);
-                    $reservations->push($reservation);
-                }
-            }
-        } catch (\Illuminate\Database\QueryException $e) {
-            if ($e->errorInfo[1] === 1062) {
-                // 同じユーザー・日時の重複予約エラー
-                return back()->withErrors([
-                    'reserved_at' => 'この時間帯はすでに予約済みです。',
+            if ($purpose) {
+                $reservation = Reservation::create([
+                    'user_id' => auth()->id(),
+                    'reserved_at' => $reservedAt,
+                    'purpose' => $purpose,
                 ]);
+                $reservations->push($reservation);
             }
-            throw $e;
         }
+        
 
         return redirect()
             ->route('reservations.complete')
@@ -221,5 +195,42 @@ class ReservationController extends Controller
 
         return redirect()->route('mypage.index')
             ->with('success', '選択した予約を削除しました。');
+    }
+
+    public function confirmDate(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'reserved_at' => 'required|array',
+            'reserved_at.*' => 'date_format:Y-m-d H:i',
+        ]);
+
+        // 件数上限チェック
+        $upcomingReservations = $user->reservations()->upcoming()->count();
+        $maxReservations = 5;
+
+        if ($upcomingReservations >= $maxReservations) {
+            return redirect()->route('reservations.create')
+                ->withErrors([
+                    'reserved_at' => 'あなたの予約可能件数の上限に達しました。',
+                ]);
+        }
+
+        // 重複予約チェック
+        foreach ($request->reserved_at as $dateTime) {
+            $exists = $user->reservations()->where('reserved_at', $dateTime)->exists();
+            if ($exists) {
+                return redirect()->route('reservations.create')
+                    ->withErrors([
+                        'reserved_at' => "{$dateTime} はすでに予約済みです。",
+                    ]);
+            }
+        }
+
+        // 問題なければ session に保存して purpose へ
+        session(['reserved_at' => $request->reserved_at]);
+
+        return redirect()->route('reservations.purpose');
     }
 }

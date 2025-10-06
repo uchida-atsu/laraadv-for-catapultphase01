@@ -22,8 +22,9 @@ Route::middleware('auth')->group(function () {
 
     // Reservationに関するCRUD処理のルート
     Route::get('/reservations/complete', [ReservationController::class, 'complete'])->name('reservations.complete');
+    Route::post('/reservations/confirm-date', [ReservationController::class, 'confirmDate'])->name('reservations.confirm-date');
     Route::get('/reservations/manage', [ReservationController::class, 'manage'])->name('reservations.manage');
-    Route::post('/reservations/purpose', [ReservationController::class, 'purpose'])->name('reservations.purpose');
+    Route::get('/reservations/purpose', [ReservationController::class, 'purpose'])->name('reservations.purpose');
     Route::delete('/reservations/bulk-delete', [ReservationController::class, 'bulkDelete'])->name('reservations.bulk-delete');
     Route::resource('reservations', ReservationController::class);
 });
