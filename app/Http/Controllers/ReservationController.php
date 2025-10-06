@@ -44,18 +44,18 @@ class ReservationController extends Controller
         }
 
         $max = 3;
-    $timeSlots = [];
+        $timeSlots = [];
 
-    foreach ($dates as $day) {
-        $dateKey = $day['date']->format('Y-m-d');
-        foreach ($times as $time) {
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i', "{$dateKey} {$time}");
-            $count = \App\Models\Reservation::where('reserved_at', $dateTime)->count();
-            $isFull = $count >= $max;
+        foreach ($dates as $day) {
+            $dateKey = $day['date']->format('Y-m-d');
+            foreach ($times as $time) {
+                $dateTime = Carbon::createFromFormat('Y-m-d H:i', "{$dateKey} {$time}");
+                $count = \App\Models\Reservation::where('reserved_at', $dateTime)->count();
+                $isFull = $count >= $max;
 
-            $timeSlots[$dateKey][$time] = $isFull;
+                $timeSlots[$dateKey][$time] = $isFull;
+            }
         }
-    }
 
 
         // // すでに入っている予約データを取得
@@ -67,15 +67,30 @@ class ReservationController extends Controller
         return view('reservations.create', compact('dates', 'times', 'timeSlots'));
     }
 
+    public function purpose(Request $request)
+    {
+        // バリデーション
+        $request->validate([
+            'reserved_at' => 'required|array',
+            'reserved_at.*' => 'date_format:Y-m-d H:i',
+        ]);
+
+        // 変数を定義
+        $selectedSlots = $request->input('reserved_at');
+
+        return view('reservations.purpose', compact('selectedSlots'));
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'reserved_at' => 'required|array',
+            'purpose' => 'required|array',
             'reserved_at.*' => 'date_format:Y-m-d H:i',
-            'purpose' => 'required|string|max:255',
+            'purpose.*' => 'required|string|max:255',
         ]);
 
 
@@ -91,15 +106,18 @@ class ReservationController extends Controller
                     'reserved_at' => 'あなたの予約可能件数の上限に達しました。'
                 ]);
         }
-
+        // reserved_atの配列を渡す
+        $reservedAts = $validated['reserved_at'];
+        // purposeの配列を渡す
+        $purposes = $validated['purpose'];
 
         try {
             $reservations = [];
-            foreach ($request->reserved_at as $datetime) {
+            foreach ($reservedAts as $index => $reservedAt) {
                 $reservations[] = Reservation::create([
                     'user_id' => auth()->id(),
-                    'reserved_at' => $datetime,
-                    'purpose' => $request->purpose,
+                    'reserved_at' => $reservedAt,
+                    'purpose' => $purposes[$index],
                 ]);
             }
         } catch (\Illuminate\Database\QueryException $e) {

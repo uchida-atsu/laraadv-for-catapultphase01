@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            予約画面
+            予約画面　1/2（予約時間選択）
         </h2>
     </x-slot>
 
     <div>
-        <form action="{{ route('reservations.store') }}" method="POST">
+        <form action="{{ route('reservations.purpose') }}" method="POST">
             @csrf
 
             <!-- {{-- 日付 × 時間表 --}} -->
@@ -41,7 +41,7 @@
                                                 class="hidden peer"
                                                 {{ $isFull ? 'disabled' : '' }}>
                                             <span class="peer-checked:bg-blue-300 block rounded-md py-2">
-                                                {{ $isFull ? '満席' : '空室あり' }}
+                                                {{ $isFull ? '満席' : '空き' }}
                                             </span>
                                         </label>
                                     </td>
@@ -57,15 +57,9 @@
 
             </div>
             <br>
-            <!-- {{-- 使用目的 --}} -->
-            <div class="form-group">
-                <label for="purpose">使用目的</label>
-                <input name="purpose" id="purpose" required class="form-input">
-            </div>
-            <br>
-            <!-- 完了ボタン -->
+            <!-- 次ページボタン -->
             <div style="text-align: center; margin-bottom: 8px;">
-                <button type="submit" class="reservation-button">予約完了</button>
+                <button type="submit" class="reservation-button">次へ</button>
             </div>
         </form>
     </div>
