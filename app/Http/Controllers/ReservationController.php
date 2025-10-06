@@ -112,13 +112,18 @@ class ReservationController extends Controller
         $purposes = $validated['purpose'];
 
         try {
-            $reservations = [];
-            foreach ($reservedAts as $index => $reservedAt) {
-                $reservations[] = Reservation::create([
-                    'user_id' => auth()->id(),
-                    'reserved_at' => $reservedAt,
-                    'purpose' => $purposes[$index],
-                ]);
+            $reservations = collect();
+            foreach ($reservedAts as $i => $reservedAt) {
+                $purpose = $purposes[$i] ?? null;
+
+                if ($purpose) {
+                    $reservation = Reservation::create([
+                        'user_id' => auth()->id(),
+                        'reserved_at' => $reservedAt,
+                        'purpose' => $purpose,
+                    ]);
+                    $reservations->push($reservation);
+                }
             }
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->errorInfo[1] === 1062) {
@@ -133,7 +138,6 @@ class ReservationController extends Controller
         return redirect()
             ->route('reservations.complete')
             ->with([
-                'completed' => true,
                 'reservations' => $reservations
             ]);
     }
@@ -178,11 +182,11 @@ class ReservationController extends Controller
      */
     public function complete()
     {
-        if (!session('completed')) {
-            // 直アクセス防止 → 予約一覧にリダイレクト
-            return redirect()->route('reservations.create');
-        }
-
+        // if (!session('completed')) {
+        //     // 直アクセス防止 → 予約一覧にリダイレクト
+        //     return redirect()->route('reservations.create');
+        // }
+        
         $reservations = session('reservations', []);
 
         return view('reservations.complete', [
