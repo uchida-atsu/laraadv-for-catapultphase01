@@ -41,7 +41,7 @@
                                                 class="hidden peer"
                                                 {{ $isFull ? 'disabled' : '' }}>
                                             <span class="peer-checked:bg-blue-300 block rounded-md py-2">
-                                                {{ $isFull ? '満席' : '空き' }}
+                                                {{ $isFull ? '満' : '空き' }}
                                             </span>
                                         </label>
                                     </td>
@@ -50,6 +50,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div>1枠3人まで</div>
 
                 @foreach ($errors->get('reserved_at') as $message)
                     <div class="font-bold text-red-500">{{ $message }}</div>
